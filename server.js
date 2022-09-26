@@ -13,6 +13,9 @@ const app = express();
 // Setting view Engine
 app.set("view engine", "ejs");
 
+// Setting static folder
+app.use(express.static("public"));
+
 // Routes
 const userRouter = require("./routes/users");
 app.use("/users", userRouter);
@@ -20,20 +23,19 @@ app.use("/users", userRouter);
 // Enables request body access
 app.use(express.urlencoded({extended: true}));
 
-// // Middleware
-// app.use(logger);
-// function logger(req, res, next) {
-//     console.log(req.originalUrl);
-//     next();
-// }
+// Middleware
+app.use(logger);
+function logger(req, res, next) {
+    console.log(req.originalUrl);
+    next();
+}
 
 app.get("/", (req, res) => {
     res.status(200);
     res.render("register-page")
 });
 
-app
-    .route("/logging-page")
+app.route("/logging-page")
     .get((req, res) => {
         res.status(200);
         res.render("logging-page", {registrationParams: {}})
@@ -55,7 +57,6 @@ app
             res.redirect("/");
             console.log("Error");
         }
-
     });
 
 app.post("/users-table", (req, res) => {
@@ -81,21 +82,28 @@ app.listen(8080, () => {
 });
 
 
-// const con = mysql.createConnection({
-//     host: "localhost",
-//     user: "root",
-//     password: process.env.PASSWORD,
-//     database: "mydb"
-// });
+// Database config
+const sqlConnectionParams = {
+    host: "localhost",
+    user: "root",
+    password: process.env.PASSWORD,
+}
 
-// con.connect(function(err) {
-//     if (err) throw err;
-//     console.log("Connected!");
-//     con.query("CREATE DATABASE mydb", function (err, result) {
-//       if (err) throw err;
-//       console.log("Database created");
-//     });
-//   });
+const con = mysql.createConnection(sqlConnectionParams);
+
+con.connect((err) => {
+    const query = "CREATE DATABASE userDB";
+
+    if (err) throw err;
+    console.log("Connected");
+
+    con.query(query, (err, result) => {
+      if (err) throw err;
+      sqlConnectionParams["database"] = "userDB"
+      console.log("Database created");
+    });
+    
+});
 
 // con.connect(function(err) {
 //   if (err) throw err;
