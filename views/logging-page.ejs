@@ -12,10 +12,10 @@
             Welcome back! Log in
         </header>
         <form action="/users-table" method="post">
-            <label for="user-name">Username</label>
-            <input type="text" id="user-name" name="user-name" value="<%= locals.userParams.username %>"/>
+            <label for="username">Username</label>
+            <input type="text" id="username" name="username" value="<%= locals.registrationParams.username || "" %>"/>
             <label for="password">Password</label>
-            <input type="password" id="password" name="password" value="<%= locals.userParams.password %>"/>
+            <input type="password" id="password" name="password" value="<%= locals.registrationParams.password || "" %>"/>
             <input type="submit" value="Log in">
         </form>
     </main>

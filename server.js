@@ -32,29 +32,48 @@ app.get("/", (req, res) => {
     res.render("register-page")
 });
 
-app.post("/logging-page", (req, res) => {
-
-    const userParams = {
-        username: req.body.username,
-        password: req.body.password,
-        confirmPassword: req.body.confirmPassword
-    } 
-
-    const isNewUserDataValid = userParams.password === userParams.confirmPassword ? true : false;
-
-    if (isNewUserDataValid) {
+app
+    .route("/logging-page")
+    .get((req, res) => {
         res.status(200);
-        res.render("logging-page", {userParams: userParams})
-    } else {
-        res.redirect("/");
-        console.log("Error");
-    }
+        res.render("logging-page", {registrationParams: {}})
+    })
+    .post((req, res) => {
 
-});
+        const registrationParams = {
+            username: req.body.username,
+            password: req.body.password,
+            confirmPassword: req.body.confirmPassword
+        } 
+
+        const isNewUserDataValid = registrationParams.password === registrationParams.confirmPassword;
+
+        if (isNewUserDataValid) {
+            res.status(200);
+            res.render("logging-page", {registrationParams: registrationParams})
+        } else {
+            res.redirect("/");
+            console.log("Error");
+        }
+
+    });
 
 app.post("/users-table", (req, res) => {
-    res.status(200);
-    res.render("users-table");
+
+    const loggingParams = {
+        username: req.body.username,
+        password: req.body.password
+    }
+
+    const isLoggingDataValid = Boolean(loggingParams.username && loggingParams.password)
+
+    if (isLoggingDataValid) {
+        res.status(200);
+        res.render("users-table", {loggingParams: loggingParams});
+    } else {
+        console.log("Error");
+        res.redirect("/logging-page");
+    }
 });
 
 app.listen(8080, () => {
