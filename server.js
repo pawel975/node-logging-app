@@ -20,35 +20,41 @@ app.use("/users", userRouter);
 // Enables request body access
 app.use(express.urlencoded({extended: true}));
 
-// Middleware
-app.use(logger);
-function logger(req, res, next) {
-    console.log(req.originalUrl);
-    next();
-}
+// // Middleware
+// app.use(logger);
+// function logger(req, res, next) {
+//     console.log(req.originalUrl);
+//     next();
+// }
 
 app.get("/", (req, res) => {
     res.status(200);
     res.render("register-page")
-    res.end();
 });
 
 app.post("/logging-page", (req, res) => {
 
     const userParams = {
         username: req.body.username,
-        password: req.body.password 
+        password: req.body.password,
+        confirmPassword: req.body.confirmPassword
     } 
 
-    res.status(200);
-    res.render("logging-page", {userParams: userParams})
-    res.end();
+    const isNewUserDataValid = userParams.password === userParams.confirmPassword ? true : false;
+
+    if (isNewUserDataValid) {
+        res.status(200);
+        res.render("logging-page", {userParams: userParams})
+    } else {
+        res.redirect("/");
+        console.log("Error");
+    }
+
 });
 
 app.post("/users-table", (req, res) => {
     res.status(200);
     res.render("users-table");
-    res.end();
 });
 
 app.listen(8080, () => {
