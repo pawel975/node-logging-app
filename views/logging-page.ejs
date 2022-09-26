@@ -13,9 +13,9 @@
         </header>
         <form action="/users-table" method="post">
             <label for="user-name">Username</label>
-            <input type="text" id="user-name" name="user-name"/>
+            <input type="text" id="user-name" name="user-name" value="<%= locals.userParams.username %>"/>
             <label for="password">Password</label>
-            <input type="password" id="password" name="password"/>
+            <input type="password" id="password" name="password" value="<%= locals.userParams.password %>"/>
             <input type="submit" value="Log in">
         </form>
     </main>

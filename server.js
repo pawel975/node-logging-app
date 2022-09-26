@@ -1,37 +1,59 @@
 const mysql = require("mysql");
 const http = require("http");
-const path = require("path");
 const fs = require("fs");
+const path = require("path");
+const express = require("express");
+
 // Enables usage of environment variables
 require("dotenv").config();
 
-http.createServer((req, res) => {
+// Init express app
+const app = express();
 
-    if (req.url === "/") {
-        fs.readFile(path.join(__dirname, "public", 'register-page.html'), (err, data) => {
-            if (err) throw err
-            res.writeHead(200, {"Content-Type":"text/html"});
-            res.end(data);
-        })
-    }
+// Setting view Engine
+app.set("view engine", "ejs");
 
-    if (req.url === "/logging-page") {
-        fs.readFile(path.join(__dirname, "public", 'logging-page.html'), (err, data) => {
-            if (err) throw err
-            res.writeHead(200, {"Content-Type":"text/html"});
-            res.end(data);
-        })
-    }
+// Routes
+const userRouter = require("./routes/users");
+app.use("/users", userRouter);
 
-    if (req.url === "/users-table") {
-        fs.readFile(path.join(__dirname, "public", 'users-table.html'), (err, data) => {
-            if (err) throw err
-            res.writeHead(200, {"Content-Type":"text/html"});
-            res.end(data);
-        })
-    }
+// Enables request body access
+app.use(express.urlencoded({extended: true}));
 
-}).listen(8080);
+// Middleware
+app.use(logger);
+function logger(req, res, next) {
+    console.log(req.originalUrl);
+    next();
+}
+
+app.get("/", (req, res) => {
+    res.status(200);
+    res.render("register-page")
+    res.end();
+});
+
+app.post("/logging-page", (req, res) => {
+
+    const userParams = {
+        username: req.body.username,
+        password: req.body.password 
+    } 
+
+    res.status(200);
+    res.render("logging-page", {userParams: userParams})
+    res.end();
+});
+
+app.post("/users-table", (req, res) => {
+    res.status(200);
+    res.render("users-table");
+    res.end();
+});
+
+app.listen(8080, () => {
+    console.log("Server listen on port 8080...");
+});
 
 
 // const con = mysql.createConnection({
