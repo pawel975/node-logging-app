@@ -92,16 +92,35 @@ const sqlConnectionParams = {
 const con = mysql.createConnection(sqlConnectionParams);
 
 con.connect((err) => {
-    const query = "CREATE DATABASE userDB";
 
-    if (err) throw err;
-    console.log("Connected");
+    const databaseName = "userdb"
 
-    con.query(query, (err, result) => {
-      if (err) throw err;
-      sqlConnectionParams["database"] = "userDB"
-      console.log("Database created");
-    });
+    // Check if DB exists
+    let isDatabaseExist = false;
+
+    con.query(`SELECT schema_name from information_schema.schemata WHERE schema_name="${databaseName}";`, (err, result) => {
+        if (err) throw err
+        if (result[0].SCHEMA_NAME) {
+            isDatabaseExist = result[0].SCHEMA_NAME === databaseName
+        }
+    })
+
+    if (isDatabaseExist) {
+        console.log("Database already exists");
+        return
+    } else {
+        
+        const query = `CREATE DATABASE ${databaseName}`;
+    
+        if (err) throw err;
+        console.log("Connected");
+    
+        con.query(query, (err, result) => {
+          if (err) throw err;
+          sqlConnectionParams["database"] = databaseName
+          console.log("Database created");
+        });
+    }
     
 });
 
