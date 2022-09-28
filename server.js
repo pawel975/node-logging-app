@@ -83,22 +83,21 @@ app.listen(8080, () => {
 
 
 // Database config
-const sqlConnectionParams = {
+const databaseName = "userdb"
+
+const con = mysql.createConnection({
     host: "localhost",
     user: "root",
     password: process.env.PASSWORD,
-}
+    database: databaseName
+});
 
-const con = mysql.createConnection(sqlConnectionParams);
 
 con.connect((err) => {
 
     if (err) throw err;
 
-    const databaseName = "userdb"
-    
     // Query Database to check if exists
-
     con.query(`SELECT schema_name from information_schema.schemata WHERE schema_name="${databaseName}";`, (err, result) => {
         if (err) throw err;
 
@@ -110,23 +109,40 @@ con.connect((err) => {
         
             con.query(query, (err, result) => {
               if (err) throw err;
-              sqlConnectionParams["database"] = databaseName
               console.log("Database created");
             });
         }
     })
+
+    con.query("show tables", (err, result) => {
+        
+        if (result.length === 0) {
+            // Create users table
+            con.query('CREATE TABLE users (id INT AUTO_INCREMENT PRIMARY KEY, username varchar(255), password varchar(255));',  (err, result) => {
+                if (err) throw err;
+                console.log("Table created");
+            });
+        } else {
+            const isTableExist = result.filter(table => table[`Tables_in_${databaseName}`] === "users")[0];
+
+            if (isTableExist) {
+                console.log("Table already exists!");
+
+            } else {
+
+                // Create users table
+                con.query('CREATE TABLE users (id INT AUTO_INCREMENT PRIMARY KEY, username varchar(255), password varchar(255));',  (err, result) => {
+                    if (err) throw err;
+                    console.log("Table created");
+                });
+            }
+
+        }
+
+    })
   
 });
 
-// con.connect(function(err) {
-//   if (err) throw err;
-//   console.log("Connected!");
-//   const sql = "CREATE TABLE examples (id INT AUTO_INCREMENT PRIMARY KEY, name constCHAR(255), address constCHAR(255))";
-//   con.query(sql, function (err, result) {
-//     if (err) throw err;
-//     console.log("Table created");
-//   });
-// });
 
 // con.connect(function(err) {
 //     if (err) throw err;
