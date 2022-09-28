@@ -85,20 +85,19 @@ app.listen(8080, () => {
 // Database config
 const databaseName = "userdb"
 
-const con = mysql.createConnection({
+// Init connection to create db on server if needed
+const initConnection = mysql.createConnection({
     host: "localhost",
     user: "root",
     password: process.env.PASSWORD,
-    database: databaseName
 });
 
-
-con.connect((err) => {
+initConnection.connect((err) => {
 
     if (err) throw err;
 
     // Query Database to check if exists
-    con.query(`SELECT schema_name from information_schema.schemata WHERE schema_name="${databaseName}";`, (err, result) => {
+    initConnection.query(`SELECT schema_name from information_schema.schemata WHERE schema_name="${databaseName}";`, (err, result) => {
         if (err) throw err;
 
         if (result.length !== 0) {
@@ -107,41 +106,57 @@ con.connect((err) => {
         
             const query = `CREATE DATABASE ${databaseName}`;
         
-            con.query(query, (err, result) => {
-              if (err) throw err;
-              console.log("Database created");
+            initConnection.query(query, (err, result) => {
+                if (err) throw err;
+                console.log("Database created");
             });
         }
     })
+});
 
-    con.query("show tables", (err, result) => {
-        
-        if (result.length === 0) {
-            // Create users table
-            con.query('CREATE TABLE users (id INT AUTO_INCREMENT PRIMARY KEY, username varchar(255), password varchar(255));',  (err, result) => {
-                if (err) throw err;
-                console.log("Table created");
-            });
-        } else {
-            const isTableExist = result.filter(table => table[`Tables_in_${databaseName}`] === "users")[0];
 
-            if (isTableExist) {
-                console.log("Table already exists!");
+const mainConnection = mysql.createConnection({
+    host: "localhost",
+    user: "root",
+    password: process.env.PASSWORD,
+    database: databaseName
+});
 
-            } else {
+setTimeout(() => {
+    mainConnection.connect((err) => {
 
+        if (err) throw err;
+    
+        mainConnection.query("show tables", (err, result) => {
+            
+            if (result.length === 0) {
                 // Create users table
-                con.query('CREATE TABLE users (id INT AUTO_INCREMENT PRIMARY KEY, username varchar(255), password varchar(255));',  (err, result) => {
+                mainConnection.query('CREATE TABLE users (id INT AUTO_INCREMENT PRIMARY KEY, username varchar(255), password varchar(255));',  (err, result) => {
                     if (err) throw err;
                     console.log("Table created");
                 });
+            } else {
+                const isTableExist = result.filter(table => table[`Tables_in_${databaseName}`] === "users")[0];
+    
+                if (isTableExist) {
+                    console.log("Table already exists!");
+    
+                } else {
+    
+                    // Create users table
+                    mainConnection.query('CREATE TABLE users (id INT AUTO_INCREMENT PRIMARY KEY, username varchar(255), password varchar(255));',  (err, result) => {
+                        if (err) throw err;
+                        console.log("Table created");
+                    });
+                }
+    
             }
+    
+        })
+      
+    });
+}, 1000)
 
-        }
-
-    })
-  
-});
 
 
 // con.connect(function(err) {
