@@ -4,6 +4,9 @@ const fs = require("fs");
 const path = require("path");
 const express = require("express");
 
+const initConnection = require("./src/initConnection");
+const databaseName = require("./src/databaseName");
+
 // Enables usage of environment variables
 require("dotenv").config();
 
@@ -81,39 +84,8 @@ app.listen(8080, () => {
     console.log("Server listen on port 8080...");
 });
 
-
-// Database config
-const databaseName = "userdb"
-
-// Init connection to create db on server if needed
-const initConnection = mysql.createConnection({
-    host: "localhost",
-    user: "root",
-    password: process.env.PASSWORD,
-});
-
-initConnection.connect((err) => {
-
-    if (err) throw err;
-
-    // Query Database to check if exists
-    initConnection.query(`SELECT schema_name from information_schema.schemata WHERE schema_name="${databaseName}";`, (err, result) => {
-        if (err) throw err;
-
-        if (result.length !== 0) {
-            console.log("Database already exists");
-        } else {
-        
-            const query = `CREATE DATABASE ${databaseName}`;
-        
-            initConnection.query(query, (err, result) => {
-                if (err) throw err;
-                console.log("Database created");
-            });
-        }
-    })
-});
-
+// Creates database on mysql server if doesn't exist
+initConnection(databaseName);
 
 const mainConnection = mysql.createConnection({
     host: "localhost",
