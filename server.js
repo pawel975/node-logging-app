@@ -6,6 +6,7 @@ const express = require("express");
 
 const initConnection = require("./src/initConnection");
 const databaseName = require("./src/databaseName");
+const getConnectionConfig = require("./src/getConnectionConfig");
 
 // Enables usage of environment variables
 require("dotenv").config();
@@ -84,26 +85,28 @@ app.listen(8080, () => {
     console.log("Server listen on port 8080...");
 });
 
+
 // Creates database on mysql server if doesn't exist
 initConnection(databaseName);
 
-const mainConnection = mysql.createConnection({
-    host: "localhost",
-    user: "root",
-    password: process.env.PASSWORD,
-    database: databaseName
-});
+const db = mysql.createConnection(getConnectionConfig(databaseName));
 
-setTimeout(() => {
-    mainConnection.connect((err) => {
+    db.connect((err) => {
 
         if (err) throw err;
     
-        mainConnection.query("show tables", (err, result) => {
+        db.query("show tables", (err, result) => {
             
+            if (err) throw err;
+
+            const createTable = `CREATE TABLE users 
+                                (id INT AUTO_INCREMENT PRIMARY KEY, 
+                                username varchar(255), 
+                                password varchar(255));`
+
             if (result.length === 0) {
-                // Create users table
-                mainConnection.query('CREATE TABLE users (id INT AUTO_INCREMENT PRIMARY KEY, username varchar(255), password varchar(255));',  (err, result) => {
+
+                db.query(createTable,  (err, result) => {
                     if (err) throw err;
                     console.log("Table created");
                 });
@@ -112,11 +115,9 @@ setTimeout(() => {
     
                 if (isTableExist) {
                     console.log("Table already exists!");
-    
                 } else {
     
-                    // Create users table
-                    mainConnection.query('CREATE TABLE users (id INT AUTO_INCREMENT PRIMARY KEY, username varchar(255), password varchar(255));',  (err, result) => {
+                    db.query(createTable, (err, result) => {
                         if (err) throw err;
                         console.log("Table created");
                     });
@@ -127,7 +128,7 @@ setTimeout(() => {
         })
       
     });
-}, 1000)
+
 
 
 
