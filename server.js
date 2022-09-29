@@ -91,21 +91,23 @@ initConnection(databaseName);
 
 const db = mysql.createConnection(getConnectionConfig(databaseName));
 
-    db.connect((err) => {
+setTimeout(() => {
 
+    db.connect((err) => {
+    
         if (err) throw err;
     
         db.query("show tables", (err, result) => {
             
             if (err) throw err;
-
+    
             const createTable = `CREATE TABLE users 
                                 (id INT AUTO_INCREMENT PRIMARY KEY, 
                                 username varchar(255), 
                                 password varchar(255));`
-
+    
             if (result.length === 0) {
-
+    
                 db.query(createTable,  (err, result) => {
                     if (err) throw err;
                     console.log("Table created");
@@ -126,8 +128,9 @@ const db = mysql.createConnection(getConnectionConfig(databaseName));
             }
     
         })
-      
+        
     });
+}, 500);
 
 
 
