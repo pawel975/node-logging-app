@@ -19,10 +19,12 @@
                 </tr>
             </thead>
             <tbody>
-                <tr>
-                    <td><%= locals.loggingParams.username %></td>
-                    <td><%= locals.loggingParams.password %></td>
-                </tr>
+                <% for(let i = 0; i < locals.allUsersLoggingParams.length; i++) { %>
+                    <tr>
+                      <td><%= allUsersLoggingParams[i].username %></td>
+                      <td><%= allUsersLoggingParams[i].password %></td>
+                    </tr>
+                 <% } %>
             </tbody>
         </table>
     </main>

@@ -22,17 +22,20 @@ app.use(express.static("public"));
 
 // Routes
 const userRouter = require("./routes/users");
+const queryResultToObject = require("./src/helpers/queryResultToObject");
 app.use("/users", userRouter);
 
 // Enables request body access
 app.use(express.urlencoded({extended: true}));
 
-// Middleware
-app.use(logger);
-function logger(req, res, next) {
-    console.log(req.originalUrl);
-    next();
-}
+// // Middleware
+// app.use(logger);
+// function logger(req, res, next) {
+//     console.log(req.originalUrl);
+//     next();
+// }
+
+const db = mysql.createConnection(getConnectionConfig(databaseName));
 
 app.get("/", (req, res) => {
     res.status(200);
@@ -41,10 +44,15 @@ app.get("/", (req, res) => {
 
 app.route("/logging-page")
     .get((req, res) => {
+
+        console.log("logging get!")
+
         res.status(200);
         res.render("logging-page", {registrationParams: {}})
     })
     .post((req, res) => {
+
+        console.log("logging post!!")
 
         const registrationParams = {
             username: req.body.username,
@@ -63,20 +71,52 @@ app.route("/logging-page")
         }
     });
 
-app.post("/users-table", (req, res) => {
-
+app.route("/users-table") 
+    .post((req, res) => {
+        
     const loggingParams = {
         username: req.body.username,
         password: req.body.password
     }
 
-    const isLoggingDataValid = Boolean(loggingParams.username && loggingParams.password)
+    const {username, password} = loggingParams;
+
+    const isLoggingDataValid = Boolean(username && password)
 
     if (isLoggingDataValid) {
         res.status(200);
-        res.render("users-table", {loggingParams: loggingParams});
+        
+        const db = mysql.createConnection(getConnectionConfig(databaseName));
+        
+        db.connect((err) => {
+            if (err) throw err;
+
+            const saveLoginDataToDatabase = `INSERT INTO users (username, password)
+                                            VALUES ('${username}', '${password}');`;
+
+            const getAllLoginDataFromDatabase = `SELECT * FROM users;`;          
+
+            db.query(saveLoginDataToDatabase, (err, result) => {
+                if (err) throw err;
+                console.log("User login data saved to database")
+            })
+
+            db.query(getAllLoginDataFromDatabase, (err, result) => {
+                if (err) throw err;
+
+                console.log("Get all users login data");
+
+                res.render("users-table", {
+                    loggingParams: loggingParams,
+                    allUsersLoggingParams: queryResultToObject(result)
+                });
+            })
+        })
+
+        console.log(allUsersLoggingParams)
+
     } else {
-        console.log("Error");
+        console.log("Invalid login data");
         res.redirect("/logging-page");
     }
 });
@@ -89,9 +129,10 @@ app.listen(8080, () => {
 // Creates database on mysql server if doesn't exist
 initConnection(databaseName);
 
-const db = mysql.createConnection(getConnectionConfig(databaseName));
 
 setTimeout(() => {
+
+    const db = mysql.createConnection(getConnectionConfig(databaseName));
 
     db.connect((err) => {
     
@@ -130,6 +171,7 @@ setTimeout(() => {
         })
         
     });
+
 }, 500);
 
 

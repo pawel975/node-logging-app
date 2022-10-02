@@ -8,9 +8,7 @@ const initConnection = (databaseName) => {
     
     connection.connect((err) => {
 
-        if (err) {
-            return console.error("error: " + err.message);
-        };
+        if (err) throw err;
 
         const findDatabase = `SELECT schema_name FROM information_schema.schemata 
                                 WHERE schema_name="${databaseName}";`
@@ -18,9 +16,7 @@ const initConnection = (databaseName) => {
         // Query Database to check if exists
         connection.query(findDatabase, (err, result) => {
 
-            if (err) {
-                return console.error("error: " + err.message);
-            };
+            if (err) throw err;
     
             if (result.length !== 0) {
                 console.log("Database already exists");
@@ -30,9 +26,7 @@ const initConnection = (databaseName) => {
             
                 connection.query(createDatabase, (err, result) => {
 
-                    if (err) {
-                        return console.error("error: " + err.message);
-                    };
+                    if (err) throw err;
                     
                     console.log("Database created");
                 });
