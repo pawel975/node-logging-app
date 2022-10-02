@@ -35,12 +35,20 @@ app.use(express.urlencoded({extended: true}));
 //     next();
 // }
 
-const db = mysql.createConnection(getConnectionConfig(databaseName));
-
-app.get("/", (req, res) => {
-    res.status(200);
-    res.render("register-page")
-});
+app.route("/")
+    .get((req, res) => {
+        res.status(301);
+        res.redirect("/register-page")
+    })
+app.route("/register-page")
+    .get((req, res) => {
+        res.status(200);
+        res.render("register-page", {info: info})
+    })
+    .post((req, res) => {
+        res.status(200);
+        res.render("register-page")
+    })
 
 app.route("/logging-page")
     .get((req, res) => {
@@ -60,13 +68,17 @@ app.route("/logging-page")
             confirmPassword: req.body.confirmPassword
         } 
 
-        const isNewUserDataValid = registrationParams.password === registrationParams.confirmPassword;
+        const isNewUserDataValid = Boolean(
+            registrationParams.username &&
+            registrationParams.password &&
+            registrationParams.password === registrationParams.confirmPassword
+        );
 
         if (isNewUserDataValid) {
             res.status(200);
             res.render("logging-page", {registrationParams: registrationParams})
         } else {
-            res.redirect("/");
+            res.redirect(301, "/");
             console.log("Error");
         }
     });
@@ -112,8 +124,6 @@ app.route("/users-table")
                 });
             })
         })
-
-        console.log(allUsersLoggingParams)
 
     } else {
         console.log("Invalid login data");
