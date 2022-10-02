@@ -43,7 +43,7 @@ app.route("/")
 app.route("/register-page")
     .get((req, res) => {
         res.status(200);
-        res.render("register-page", {info: info})
+        res.render("register-page")
     })
     .post((req, res) => {
         res.status(200);
@@ -52,15 +52,10 @@ app.route("/register-page")
 
 app.route("/logging-page")
     .get((req, res) => {
-
-        console.log("logging get!")
-
         res.status(200);
         res.render("logging-page", {registrationParams: {}})
     })
     .post((req, res) => {
-
-        console.log("logging post!!")
 
         const registrationParams = {
             username: req.body.username,
