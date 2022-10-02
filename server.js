@@ -1,12 +1,10 @@
 const mysql = require("mysql");
-const http = require("http");
-const fs = require("fs");
-const path = require("path");
 const express = require("express");
 
 const initConnection = require("./src/initConnection");
 const databaseName = require("./src/databaseName");
 const getConnectionConfig = require("./src/getConnectionConfig");
+const queryResultToObject = require("./src/helpers/queryResultToObject");
 
 // Enables usage of environment variables
 require("dotenv").config();
@@ -22,7 +20,6 @@ app.use(express.static("public"));
 
 // Routes
 const userRouter = require("./routes/users");
-const queryResultToObject = require("./src/helpers/queryResultToObject");
 app.use("/users", userRouter);
 
 // Enables request body access
@@ -37,7 +34,7 @@ app.use(express.urlencoded({extended: true}));
 
 app.route("/")
     .get((req, res) => {
-        res.status(301);
+        res.status(200);
         res.redirect("/register-page")
     })
 app.route("/register-page")
@@ -73,8 +70,8 @@ app.route("/logging-page")
             res.status(200);
             res.render("logging-page", {registrationParams: registrationParams})
         } else {
-            res.redirect(301, "/");
-            console.log("Error");
+            res.redirect("/register-page");
+            console.log("Invalid form of registration data");
         }
     });
 
