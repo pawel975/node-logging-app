@@ -14,6 +14,7 @@ require("dotenv").config();
 // Init express app
 const app = express();
 
+// Making cookie manage easier
 app.use(cookieParser());
 
 // Setting view Engine
@@ -36,10 +37,14 @@ app.route("/")
         res.status(200);
         res.redirect("/register-page")
     })
-    app.route("/register-page")
+
+app.route("/register-page")
     .get((req, res) => {
-        res.cookie("session_id", "123");
         res.status(200);
+        res.cookie("session_id", "123", {
+            secure: true,
+            httpOnly: true,
+        }); // server responds with cookie and saves it to the browser
         res.render("register-page")
     })
     .post((req, res) => {
@@ -77,14 +82,7 @@ app.route("/logging-page")
 
     
 app.route("/users-table")
-    .get((req, res) => {
-        res.render("error", {
-            text: "Unauthorized access - you're not logged in", 
-            status: 403
-        });
-        res.status(403);
-    })
-    .post(validateCookie, (req, res) => {
+    .all(validateCookie, (req, res) => {
         
         const loggingParams = {
             username: req.body.username,
@@ -95,28 +93,26 @@ app.route("/users-table")
         
         if (username && password) {
 
-            res.status(200);
-            
             const db = mysql.createConnection(getConnectionConfig(databaseName));
             
             db.connect((err) => {
                 if (err) throw err;
-
+                
                 const saveLoginDataToDatabase = `INSERT INTO users (username, password)
-                                                VALUES ('${username}', '${password}');`;
-
+                VALUES ('${username}', '${password}');`;
+                
                 const getAllLoginDataFromDatabase = `SELECT * FROM users;`;          
-
+                
                 db.query(saveLoginDataToDatabase, (err, result) => {
                     if (err) throw err;
                     console.log("User login data saved to database")
                 })
-
+                
                 db.query(getAllLoginDataFromDatabase, (err, result) => {
                     if (err) throw err;
-
+                    
                     console.log("Get all users login data");
-
+                    
                     res.render("users-table", {
                         loggingParams: loggingParams,
                         allUsersLoggingParams: queryResultToObject(result)
@@ -124,6 +120,8 @@ app.route("/users-table")
                 })
             })
 
+            res.status(200);
+            
         } else {
             console.log("Invalid login data");
             res.redirect("/logging-page");
