@@ -1,16 +1,20 @@
 const mysql = require("mysql");
 const express = require("express");
+const cookieParser = require("cookie-parser");
 
 const initConnection = require("./src/initConnection");
 const databaseName = require("./src/databaseName");
 const getConnectionConfig = require("./src/getConnectionConfig");
 const queryResultToObject = require("./src/helpers/queryResultToObject");
+const validateCookie = require("./src/middlewares/validateCookie");
 
 // Enables usage of environment variables
 require("dotenv").config();
 
 // Init express app
 const app = express();
+
+app.use(cookieParser());
 
 // Setting view Engine
 app.set("view engine", "ejs");
@@ -24,21 +28,17 @@ app.use("/users", userRouter);
 
 // Enables request body access
 app.use(express.urlencoded({extended: true}));
-
-// // Middleware
-// app.use(logger);
-// function logger(req, res, next) {
-//     console.log(req.originalUrl);
-//     next();
-// }
+// Enables getting JSON format
+app.use(express.json());
 
 app.route("/")
     .get((req, res) => {
         res.status(200);
         res.redirect("/register-page")
     })
-app.route("/register-page")
+    app.route("/register-page")
     .get((req, res) => {
+        res.cookie("session_id", "123");
         res.status(200);
         res.render("register-page")
     })
@@ -75,52 +75,58 @@ app.route("/logging-page")
         }
     });
 
-app.route("/users-table") 
-    .post((req, res) => {
+    
+app.route("/users-table")
+    .get((req, res) => {
+        res.render("error", {text: "You're not logged in", status: 403});
+        res.status(403);
+    })
+    .post(validateCookie, (req, res) => {
         
-    const loggingParams = {
-        username: req.body.username,
-        password: req.body.password
-    }
-
-    const {username, password} = loggingParams;
-
-    const isLoggingDataValid = Boolean(username && password)
-
-    if (isLoggingDataValid) {
-        res.status(200);
+        const loggingParams = {
+            username: req.body.username,
+            password: req.body.password
+        }
         
-        const db = mysql.createConnection(getConnectionConfig(databaseName));
+        const {username, password} = loggingParams;
         
-        db.connect((err) => {
-            if (err) throw err;
+        const isLoggingDataValid = Boolean(username && password)
+        
+        if (isLoggingDataValid) {
 
-            const saveLoginDataToDatabase = `INSERT INTO users (username, password)
-                                            VALUES ('${username}', '${password}');`;
-
-            const getAllLoginDataFromDatabase = `SELECT * FROM users;`;          
-
-            db.query(saveLoginDataToDatabase, (err, result) => {
-                if (err) throw err;
-                console.log("User login data saved to database")
-            })
-
-            db.query(getAllLoginDataFromDatabase, (err, result) => {
+            res.status(200);
+            
+            const db = mysql.createConnection(getConnectionConfig(databaseName));
+            
+            db.connect((err) => {
                 if (err) throw err;
 
-                console.log("Get all users login data");
+                const saveLoginDataToDatabase = `INSERT INTO users (username, password)
+                                                VALUES ('${username}', '${password}');`;
 
-                res.render("users-table", {
-                    loggingParams: loggingParams,
-                    allUsersLoggingParams: queryResultToObject(result)
-                });
+                const getAllLoginDataFromDatabase = `SELECT * FROM users;`;          
+
+                db.query(saveLoginDataToDatabase, (err, result) => {
+                    if (err) throw err;
+                    console.log("User login data saved to database")
+                })
+
+                db.query(getAllLoginDataFromDatabase, (err, result) => {
+                    if (err) throw err;
+
+                    console.log("Get all users login data");
+
+                    res.render("users-table", {
+                        loggingParams: loggingParams,
+                        allUsersLoggingParams: queryResultToObject(result)
+                    });
+                })
             })
-        })
 
-    } else {
-        console.log("Invalid login data");
-        res.redirect("/logging-page");
-    }
+        } else {
+            console.log("Invalid login data");
+            res.redirect("/logging-page");
+        }
 });
 
 app.listen(8080, () => {
@@ -130,7 +136,6 @@ app.listen(8080, () => {
 
 // Creates database on mysql server if doesn't exist
 initConnection(databaseName);
-
 
 setTimeout(() => {
 
@@ -156,7 +161,7 @@ setTimeout(() => {
                     console.log("Table created");
                 });
             } else {
-                const isTableExist = result.filter(table => table[`Tables_in_${databaseName}`] === "users")[0];
+                const isTableExist = result.find(table => table[`Tables_in_${databaseName}`] === "users");
     
                 if (isTableExist) {
                     console.log("Table already exists!");

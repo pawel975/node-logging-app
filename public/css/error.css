@@ -1,0 +1,29 @@
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    padding: 1rem;
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+}
+
+.error {
+    display: flex;
+    flex-direction: column;  
+    gap: 0.5rem;
+}
+
+.error__status {
+    font-size: 3rem;
+    color: rgb(188, 24, 24);
+    font-weight: 700;
+}
+
+.error__text {
+    font-weight: 400;
+    font-size: 2rem;
+}
