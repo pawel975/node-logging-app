@@ -78,7 +78,10 @@ app.route("/logging-page")
     
 app.route("/users-table")
     .get((req, res) => {
-        res.render("error", {text: "You're not logged in", status: 403});
+        res.render("error", {
+            text: "Unauthorized access - you're not logged in", 
+            status: 403
+        });
         res.status(403);
     })
     .post(validateCookie, (req, res) => {
@@ -90,9 +93,7 @@ app.route("/users-table")
         
         const {username, password} = loggingParams;
         
-        const isLoggingDataValid = Boolean(username && password)
-        
-        if (isLoggingDataValid) {
+        if (username && password) {
 
             res.status(200);
             
