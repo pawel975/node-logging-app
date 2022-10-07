@@ -11,6 +11,13 @@
 <body>
     <main>
         <header>Hi <%= locals.loggingParams.username %></header>
+        <form 
+            action="/loggedout-page"
+            class="form-logout" 
+            method="post"
+        >
+            <input type="submit" value="Log out" id="logout" name="">
+        </form>
         <table>
             <thead>
                 <tr>

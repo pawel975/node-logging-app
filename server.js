@@ -7,6 +7,7 @@ const initConnection = require("./src/initConnection");
 const databaseName = require("./src/databaseName");
 const getConnectionConfig = require("./src/getConnectionConfig");
 const queryResultToObject = require("./src/helpers/queryResultToObject");
+// const validateCookie = require("./src/middlewares/validateCookie");
 
 // Enables usage of environment variables
 require("dotenv").config();
@@ -50,7 +51,6 @@ app.route("/register-page")
     .get((req, res) => {
 
         const session = req.session;
-        console.log(session);
 
         res.status(200);
         res.cookie("session_id", "123", {
@@ -71,13 +71,18 @@ app.route("/logging-page")
     })
     .post((req, res) => {
 
-        console.log(req.headers.cookie)
-
         const registrationParams = {
             username: req.body.username,
             password: req.body.password,
             confirmPassword: req.body.confirmPassword
         } 
+
+        const {username, password} = registrationParams;
+
+        const session = req.session;
+
+        session.username = username;
+        session.password = password;
 
         const isNewUserDataValid = Boolean(
             registrationParams.username &&
@@ -102,35 +107,49 @@ app.route("/users-table")
             username: req.body.username,
             password: req.body.password
         }
-        
+
         const {username, password} = loggingParams;
+
+        const session = req.session;
         
-        if (username && password) {
+        if (session.username && (username && password)) {
 
             const db = mysql.createConnection(getConnectionConfig(databaseName));
             
             db.connect((err) => {
                 if (err) throw err;
                 
-                const saveLoginDataToDatabase = `INSERT INTO users (username, password)
-                VALUES ('${username}', '${password}');`;
+                // const saveLoginDataToDatabase = `INSERT INTO users (username, password)
+                // VALUES ('${username}', '${password}');`;
                 
                 const getAllLoginDataFromDatabase = `SELECT * FROM users;`;          
                 
-                db.query(saveLoginDataToDatabase, (err, result) => {
-                    if (err) throw err;
-                    console.log("User login data saved to database")
-                })
+                // db.query(saveLoginDataToDatabase, (err, result) => {
+                //     if (err) throw err;
+                //     console.log("User login data saved to database")
+                // })
                 
                 db.query(getAllLoginDataFromDatabase, (err, result) => {
                     if (err) throw err;
                     
                     console.log("Get all users login data");
+
+                    const parsedResult = queryResultToObject(result);
+                    const user = parsedResult.find(user => 
+                        user.username === username && user.password === password
+                    )
+                    console.log(parsedResult)
+                    console.log(user);
+
+                    if (user) {
+                        res.render("users-table", {
+                            loggingParams: loggingParams,
+                            allUsersLoggingParams: parsedResult
+                        });
+                    } else {
+                        res.send("Nope");
+                    }
                     
-                    res.render("users-table", {
-                        loggingParams: loggingParams,
-                        allUsersLoggingParams: queryResultToObject(result)
-                    });
                 })
             })
 
@@ -141,6 +160,13 @@ app.route("/users-table")
             res.redirect("/logging-page");
         }
 });
+
+app.route("/loggedout-page")
+    .post((req, res) => {
+        req.session.destroy();
+        res.status(200);
+        res.render("loggedout-page");
+    })
 
 app.listen(8080, () => {
     console.log("Server listen on port 8080...");
