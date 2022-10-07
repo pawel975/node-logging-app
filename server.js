@@ -1,12 +1,12 @@
 const mysql = require("mysql");
 const express = require("express");
 const cookieParser = require("cookie-parser");
+const session = require("express-session");
 
 const initConnection = require("./src/initConnection");
 const databaseName = require("./src/databaseName");
 const getConnectionConfig = require("./src/getConnectionConfig");
 const queryResultToObject = require("./src/helpers/queryResultToObject");
-const validateCookie = require("./src/middlewares/validateCookie");
 
 // Enables usage of environment variables
 require("dotenv").config();
@@ -16,6 +16,14 @@ const app = express();
 
 // Making cookie manage easier
 app.use(cookieParser());
+
+// Create session
+app.use(session({
+    secret: process.env.SECRET,
+    saveUninitialized: true,
+    cookie: {maxAge: 86400000},
+    resave: false
+}))
 
 // Setting view Engine
 app.set("view engine", "ejs");
@@ -40,6 +48,10 @@ app.route("/")
 
 app.route("/register-page")
     .get((req, res) => {
+
+        const session = req.session;
+        console.log(session);
+
         res.status(200);
         res.cookie("session_id", "123", {
             secure: true,
@@ -58,6 +70,8 @@ app.route("/logging-page")
         res.render("logging-page", {registrationParams: {}})
     })
     .post((req, res) => {
+
+        console.log(req.headers.cookie)
 
         const registrationParams = {
             username: req.body.username,
@@ -82,7 +96,7 @@ app.route("/logging-page")
 
     
 app.route("/users-table")
-    .all(validateCookie, (req, res) => {
+    .all((req, res) => {
         
         const loggingParams = {
             username: req.body.username,
