@@ -172,10 +172,11 @@ app.route("/user-dashboard")
 
                     const session = req.session;
 
+                    session.userid = user.id
                     session.username = user.username;
                     session.password = user.password;
 
-                    const {username, password} = session;
+                    const {username} = session;
 
                     res.status(200).render("user-dashboard", {username: username});
 
