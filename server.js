@@ -100,9 +100,11 @@ app.route("/logging-page")
             const saveLoginDataToDatabase = `INSERT INTO users (username, password)
             VALUES ('${registrationUsername}', '${registrationPassword}');`;
                     
+            const db = mysql.createConnection(getConnectionConfig(databaseName));
+
             db.query(saveLoginDataToDatabase, (err, result) => {
                 if (err) throw err;
-                console.log("User login data saved to database")
+                console.log("User registered")
             })
 
             res.status(200);
@@ -146,7 +148,9 @@ app.route("/user-dashboard")
         // If logging data format is valid check in database if user is registered
         if (isLoggingDataValid) {
 
-            const getAllLoginDataFromDatabase = `SELECT * FROM users;`;          
+            const getAllLoginDataFromDatabase = `SELECT * FROM users;`;    
+            
+            const db = mysql.createConnection(getConnectionConfig(databaseName));
                 
             db.query(getAllLoginDataFromDatabase, (err, result) => {
 
