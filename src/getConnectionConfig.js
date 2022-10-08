@@ -1,11 +1,23 @@
 
 const getConnectionConfig = (databaseName) => {
-    
-    return config = {
-        host: "localhost",
-        user: "root",
-        password: process.env.PASSWORD,
-        database: databaseName,
+
+    if (databaseName) {
+        
+        return config = {
+            host: "localhost",
+            user: "root",
+            password: process.env.PASSWORD,
+            database: databaseName,
+        }
+
+    } else {
+
+        return config = {
+            host: "localhost",
+            user: "root",
+            password: process.env.PASSWORD,
+        }
+        
     }
 }
 

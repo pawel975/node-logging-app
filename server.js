@@ -58,7 +58,10 @@ app.route("/")
     })
 
 app.route("/home-page")
-    .all((req, res) => {
+    .get((req, res) => {
+        res.status(200).render("home-page");
+    })
+    .post((req, res) => {
         res.status(200).render("home-page");
     })
 
@@ -75,41 +78,48 @@ app.route("/logging-page")
     })
     .post((req, res) => {
 
-        // Validate registration params
-        const registrationParams = {
-            registrationUsername: req.body.username,
-            registrationPassword: req.body.password,
-            registrationConfirmPassword: req.body.confirmPassword
-        }
-
-        const {registrationUsername, registrationPassword, registrationConfirmPassword} = registrationParams;
-
-        const areRegistrationParamsValid = Boolean(
-            registrationUsername &&
-            registrationPassword &&
-            registrationPassword === registrationConfirmPassword
-        );
-
-        // If registration params are valid, register user in database
-        if (areRegistrationParamsValid) {
-
-            const saveLoginDataToDatabase = `INSERT INTO users (username, password)
-            VALUES ('${registrationUsername}', '${registrationPassword}');`;
-                    
-            const db = mysql.createConnection(getConnectionConfig(databaseName));
-
-            db.query(saveLoginDataToDatabase, (err, result) => {
-                if (err) throw err;
-                console.log("User registered")
-            })
-
-            res.status(200);
-            res.render("logging-page")
-
+        // If there is no form data send to logging page, render logging page
+        if (!Object.keys(req.body).length) {
+            res.status(200).render("logging-page");
         } else {
-            res.redirect("/register-page");
-            console.log("Invalid form of registration data");
+            
+            // Validate registration params
+            const registrationParams = {
+                registrationUsername: req.body.username,
+                registrationPassword: req.body.password,
+                registrationConfirmPassword: req.body.confirmPassword
+            }
+    
+            const {registrationUsername, registrationPassword, registrationConfirmPassword} = registrationParams;
+    
+            const areRegistrationParamsValid = Boolean(
+                registrationUsername &&
+                registrationPassword &&
+                registrationPassword === registrationConfirmPassword
+            );
+    
+            // If registration params are valid, register user in database
+            if (areRegistrationParamsValid) {
+    
+                const saveLoginDataToDatabase = `INSERT INTO users (username, password)
+                VALUES ('${registrationUsername}', '${registrationPassword}');`;
+                        
+                const db = mysql.createConnection(getConnectionConfig(databaseName));
+    
+                db.query(saveLoginDataToDatabase, (err, result) => {
+                    if (err) throw err;
+                    console.log("User registered")
+                })
+    
+                res.status(200);
+                res.render("logging-page")
+    
+            } else {
+                res.redirect("/register-page");
+                console.log("Invalid form of registration data");
+            }
         }
+
     });
 
 app.route("/user-dashboard")
@@ -131,6 +141,7 @@ app.route("/user-dashboard")
     })
     .post((req, res) => {
 
+        console.log("try to login")
         // Checking if logging data format is valid
         const loggingParams = {
             loggingUsername: req.body.username,
