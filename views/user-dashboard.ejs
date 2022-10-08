@@ -10,6 +10,13 @@
 <body>
     <section>
         <header>Welcome <%= locals.username %></header>
+        <form 
+            action="/loggedout-page"
+            class="form-logout" 
+            method="post"
+        >
+            <input type="submit" value="Log out" id="logout" name="">
+        </form>
     </section>
 </body>
 </html>

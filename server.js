@@ -59,12 +59,7 @@ app.route("/")
 
 app.route("/register-page")
     .get((req, res) => {
-
         res.status(200);
-        res.cookie("session_id", "123", {
-            secure: true,
-            httpOnly: true,
-        }); // server responds with cookie and saves it to the browser
         res.render("register-page")
     })
     .post((req, res) => {
@@ -177,16 +172,8 @@ app.route("/user-dashboard")
                 }
                 
             })
-        }
-
-        if (username) {
-            res.status(200);
-            res.render("user-dashboard", {username: username});
         } else {
-            res.status(403).render("error", {
-                text: "Unauthorized access - you're not logged in", 
-                status: 403
-            })
+            res.status(301).redirect("/logging-page");
         }
     })
 
