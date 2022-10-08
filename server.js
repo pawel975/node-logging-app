@@ -79,95 +79,40 @@ app.route("/logging-page")
     })
     .post((req, res) => {
 
-        const loggingParams = {
-            username: req.body.username,
-            password: req.body.password,
-            confirmPassword: req.body.confirmPassword
-        } 
+        // Validate registration params
+        const registrationParams = {
+            registrationUsername: req.body.username,
+            registrationPassword: req.body.password,
+            registrationConfirmPassword: req.body.confirmPassword
+        }
 
-        const {username, password} = loggingParams;
+        const {registrationUsername, registrationPassword, registrationConfirmPassword} = registrationParams;
 
-        const session = req.session;
-
-        session.username = username;
-        session.password = password;
-
-        const isNewUserDataValid = Boolean(
-            loggingParams.username &&
-            loggingParams.password &&
-            loggingParams.password === loggingParams.confirmPassword
+        const areRegistrationParamsValid = Boolean(
+            registrationUsername &&
+            registrationPassword &&
+            registrationPassword === registrationConfirmPassword
         );
 
-        if (isNewUserDataValid) {
+        // If registration params are valid, register user in database
+        if (areRegistrationParamsValid) {
+
+            const saveLoginDataToDatabase = `INSERT INTO users (username, password)
+            VALUES ('${registrationUsername}', '${registrationPassword}');`;
+                    
+            db.query(saveLoginDataToDatabase, (err, result) => {
+                if (err) throw err;
+                console.log("User login data saved to database")
+            })
+
             res.status(200);
             res.render("logging-page")
+
         } else {
             res.redirect("/register-page");
             console.log("Invalid form of registration data");
         }
     });
-
-    
-app.route("/users-table")
-    .all((req, res) => {
-        
-        const loggingParams = {
-            username: req.body.username,
-            password: req.body.password
-        }
-
-        const {username, password} = loggingParams;
-
-        const session = req.session;
-        
-        if (session.username && (username && password)) {
-
-            const db = mysql.createConnection(getConnectionConfig(databaseName));
-            
-            db.connect((err) => {
-                if (err) throw err;
-                
-                // const saveLoginDataToDatabase = `INSERT INTO users (username, password)
-                // VALUES ('${username}', '${password}');`;
-                
-                const getAllLoginDataFromDatabase = `SELECT * FROM users;`;          
-                
-                // db.query(saveLoginDataToDatabase, (err, result) => {
-                //     if (err) throw err;
-                //     console.log("User login data saved to database")
-                // })
-                
-                db.query(getAllLoginDataFromDatabase, (err, result) => {
-                    if (err) throw err;
-                    
-                    console.log("Get all users login data");
-
-                    const allUsers = queryResultToObject(result);
-                    const user = allUsers.find(user => 
-                        user.username === username && user.password === password
-                    )
-                    console.log(allUsers)
-                    console.log(user);
-
-                    if (user) {
-                        res.render("users-table", {
-                            loggingParams: loggingParams,
-                            allUsersLoggingParams: allUsers
-                        });
-                    } else {
-                        res.send("Nope");
-                    }
-                    
-                })
-            })
-
-            res.status(200);
-            
-        } else {
-            console.log("Invalid login data");
-            res.redirect("/logging-page");
-        }
-});
 
 app.route("/user-dashboard")
     .get((req, res) => {
@@ -192,16 +137,11 @@ app.route("/user-dashboard")
         const loggingParams = {
             loggingUsername: req.body.username,
             loggingPassword: req.body.password,
-            loggingConfirmPassword: req.body.confirmPassword
         } 
 
-        const {loggingUsername, loggingPassword, loggingConfirmPassword} = loggingParams;
+        const {loggingUsername, loggingPassword} = loggingParams;
 
-        const isLoggingDataValid = Boolean(
-            loggingUsername &&
-            loggingPassword &&
-            loggingPassword === loggingConfirmPassword
-        );
+        const isLoggingDataValid = Boolean(loggingUsername && loggingPassword);
 
         // If logging data format is valid check in database if user is registered
         if (isLoggingDataValid) {
