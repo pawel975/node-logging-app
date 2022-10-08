@@ -54,15 +54,16 @@ app.use(express.json());
 app.route("/")
     .get((req, res) => {
         res.status(200);
-        res.redirect("/register-page")
+        res.redirect("/home-page")
+    })
+
+app.route("/home-page")
+    .all((req, res) => {
+        res.status(200).render("home-page");
     })
 
 app.route("/register-page")
-    .get((req, res) => {
-        res.status(200);
-        res.render("register-page")
-    })
-    .post((req, res) => {
+    .all((req, res) => {
         res.status(200);
         res.render("register-page")
     })
