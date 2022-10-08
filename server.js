@@ -164,6 +164,8 @@ app.route("/user-dashboard")
                     session.username = user.username;
                     session.password = user.password;
 
+                    const {username, password} = session;
+
                     res.status(200).render("user-dashboard", {username: username});
 
                 } else {
