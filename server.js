@@ -50,8 +50,6 @@ app.route("/")
 app.route("/register-page")
     .get((req, res) => {
 
-        const session = req.session;
-
         res.status(200);
         res.cookie("session_id", "123", {
             secure: true,
@@ -160,6 +158,23 @@ app.route("/users-table")
             res.redirect("/logging-page");
         }
 });
+
+app.route("/user-dashboard")
+    .all((req, res) => {
+        const session = req.session;
+
+        const {username} = session;
+
+        if (username) {
+            res.status(200);
+            res.render("user-dashboard", {username: username});
+        } else {
+            res.status(403).render("error", {
+                text: "Unauthorized access - you're not logged in", 
+                status: 403
+            })
+        }
+    })
 
 app.route("/loggedout-page")
     .post((req, res) => {

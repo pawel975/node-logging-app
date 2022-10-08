@@ -12,11 +12,11 @@
         <header>
             Welcome back! Log in
         </header>
-        <form action="/users-table" method="post">
+        <form action="/user-dashboard" method="post">
             <label for="username">Username</label>
-            <input type="text" id="username" name="username" value="<%= locals.registrationParams.username || "" %>"/>
+            <input type="text" id="username" name="username"/>
             <label for="password">Password</label>
-            <input type="password" id="password" name="password" value="<%= locals.registrationParams.password || "" %>"/>
+            <input type="password" id="password" name="password"/>
             <input type="submit" value="Log in">
         </form>
     </main>
