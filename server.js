@@ -141,7 +141,6 @@ app.route("/user-dashboard")
     })
     .post((req, res) => {
 
-        console.log("try to login")
         // Checking if logging data format is valid
         const loggingParams = {
             loggingUsername: req.body.username,
