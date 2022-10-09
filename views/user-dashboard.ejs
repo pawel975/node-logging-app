@@ -5,17 +5,55 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="/css/common.css">
+    <link rel="stylesheet" href="/css/table.css">
     <title>Dashboard</title>
 </head>
 <body>
     <section>
         <header>Welcome <%= locals.username %></header>
-        <a href="/loggedout">
-            <button>Log out</button>
-        </a>
-        <a href="/deleted-account">
-            <button>Delete account</button>
-        </a>
+        <nav>
+            <a href="/loggedout">
+                <button>Log out</button>
+            </a>
+            <a href="/deleted-account">
+                <button>Delete account</button>
+            </a>
+        </nav>
+
+        <hr>
+
+        <form action="/note-created" method="post" id="create-note-form">
+            <div>
+                <label for="noteTitle">Title</label>
+                <input type="text" id="noteTitle" name="noteTitle" />
+            </div>
+            <div>
+                <label for="noteText">Text</label>
+                <input type="text" id="noteText" name="noteText" />
+            </div>
+            <input type="submit" value="Create note">
+        </form>
+
+        <hr>
+        
+        <table class="notes-container">
+            <thead>
+                <tr>
+                    <th>Title</th>
+                    <th>Text</th>
+                </tr>
+            </thead>
+            <tbody>
+
+                <% for (let i = 0; i < locals.notes.length; i++) { %>
+                    <tr>
+                        <td><%= locals.notes[i].title %></td>
+                        <td><%= locals.notes[i].text %></td>
+                    </tr>   
+                <% } %>
+
+            </tbody>
+        </table>
     </section>
 </body>
 </html>

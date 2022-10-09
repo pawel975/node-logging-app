@@ -6,7 +6,8 @@ const express = require("express");
 const cookieParser = require("cookie-parser");
 const session = require("express-session");
 
-const initConnection = require("./src/initConnection");
+const initDatabase = require("./src/initDatabase");
+const initDatabaseTables = require("./src/initDatabaseTables");
 const databaseName = require("./src/databaseName");
 const getConnectionConfig = require("./src/getConnectionConfig");
 const queryResultToObject = require("./src/helpers/queryResultToObject");
@@ -40,6 +41,7 @@ app.use(express.static("public"));
 
 // Routes
 const userRouter = require("./routes/users");
+const getUserNotes = require("./src/getUserNotes");
 app.use("/users", userRouter);
 
 // Enables request body access
@@ -101,13 +103,15 @@ app.route("/logging")
             // If registration params are valid, register user in database
             if (areRegistrationParamsValid) {
     
-                const saveLoginDataToDatabase = `INSERT INTO users (username, password)
+                const registerUserToDatabase = `INSERT INTO users (username, password)
                 VALUES ('${registrationUsername}', '${registrationPassword}');`;
                         
                 const db = mysql.createConnection(getConnectionConfig(databaseName));
     
-                db.query(saveLoginDataToDatabase, (err, result) => {
+                db.query(registerUserToDatabase, (err, result) => {
+
                     if (err) throw err;
+
                     console.log("User registered")
                 })
     
@@ -119,27 +123,10 @@ app.route("/logging")
                 console.log("Invalid form of registration data");
             }
         }
-
     });
 
 app.route("/user-dashboard")
-    .get((req, res) => {
-
-        const session = req.session;
-
-        const {username} = session;
-
-        if (username) {
-            res.status(200);
-            res.render("user-dashboard", {username: username});
-        } else {
-            res.status(403).render("error", {
-                text: "Unauthorized access - you're not logged in", 
-                status: 403
-            })
-        }
-    })
-    .post((req, res) => {
+    .all((req, res) => {
 
         // Checking if logging data format is valid
         const loggingParams = {
@@ -158,39 +145,52 @@ app.route("/user-dashboard")
             
             const db = mysql.createConnection(getConnectionConfig(databaseName));
                 
-            db.query(getAllLoginDataFromDatabase, (err, result) => {
+            db.connect((err) => {
 
                 if (err) throw err;
 
-                const allUsers = queryResultToObject(result);
-                const user = allUsers.find(user => 
-                    user.username === loggingUsername && user.password === loggingPassword
-                )
+                db.query(getAllLoginDataFromDatabase, async (err, result) => {
+    
+                    if (err) throw err;
+    
+                    const allUsers = queryResultToObject(result);
+    
+                    const user = allUsers.find(user => 
+                        user.username === loggingUsername && user.password === loggingPassword
+                    )
+    
+                    if (user) {
+    
+                        const session = req.session;
+    
+                        session.userid = user.id
+                        session.username = user.username;
+                        session.password = user.password;
+                        
+                        const {username, userid} = session;
 
-                if (user) {
+                        const allUserNotes = await getUserNotes(db, userid)
 
-                    const session = req.session;
+                        res.status(200).render("user-dashboard", {
+                            username: username,
+                            notes: allUserNotes
+                        })
 
-                    session.userid = user.id
-                    session.username = user.username;
-                    session.password = user.password;
+                    } else {
+                        res.status(301).redirect("/logging");
+                    }
+                    
+                })
 
-                    const {username} = session;
-
-                    res.status(200).render("user-dashboard", {username: username});
-
-                } else {
-                    res.status(301).redirect("/logging");
-                }
-                
-            })
+            });
+            
         } else {
             res.status(301).redirect("/logging");
         }
     })
 
 app.route("/loggedout")
-    .post((req, res) => {
+    .all((req, res) => {
         req.session.destroy();
         res.status(200);
         res.render("loggedout-page");
@@ -225,70 +225,49 @@ app.route("/deleted-account")
         }
     })
 
+app.route("/note-created")
+    .all((req, res) => {
+
+        const session = req.session;
+        
+        const  {userid} = session;
+        
+        if (userid) {
+            
+            const {noteTitle, noteText} = req.body;
+
+            const saveNoteToDatabase = `INSERT INTO notes (userid, title, text)
+                                            VALUES ("${userid}", "${noteTitle}", "${noteText}")`
+
+            const db = mysql.createConnection(getConnectionConfig(databaseName));
+
+            db.query(saveNoteToDatabase, (err, result) => {
+                if (err) throw err;
+
+                console.log("Note successfully added to database");
+            })
+
+            res.status(200).render("note-created");
+        } else {
+            res.status(403).render("error", {
+                status: 403,
+                text: "Unauthorized access - you're not logged in"
+            });
+        }
+    })
+
 app.listen(8080, () => {
     console.log("Server listen on port 8080...");
 });
 
+const init = async () => {
 
-// Creates database on mysql server if doesn't exist
-initConnection(databaseName);
-
-
-
-setTimeout(() => {
-
-    const db = mysql.createConnection(getConnectionConfig(databaseName));
-
-    db.connect((err) => {
+    // Creates database on mysql server if doesn't exist
+    await initDatabase(databaseName);
     
-        if (err) throw err;
-    
-        db.query("show tables", (err, result) => {
-            
-            if (err) throw err;
-    
-            const createTable = `CREATE TABLE users 
-                                (id INT AUTO_INCREMENT PRIMARY KEY, 
-                                username varchar(255), 
-                                password varchar(255));`
-    
-            if (result.length === 0) {
-    
-                db.query(createTable,  (err, result) => {
-                    if (err) throw err;
-                    console.log("Table created");
-                });
-            } else {
-                const isTableExist = result.find(table => table[`Tables_in_${databaseName}`] === "users");
-    
-                if (isTableExist) {
-                    console.log("Table already exists!");
-                } else {
-    
-                    db.query(createTable, (err, result) => {
-                        if (err) throw err;
-                        console.log("Table created");
-                    });
-                }
-    
-            }
-    
-        })
-        
-    });
+    // Populates database with users table
+    initDatabaseTables(databaseName);
+}
 
-}, 500);
+init();
 
-
-
-
-// con.connect(function(err) {
-//     if (err) throw err;
-//     console.log("Connected!");
-//     const sql = "INSERT INTO examples (name, address) VALUES ('Company Inc', 'Highway 37')";
-//     con.query(sql, function (err, result) {
-//       if (err) throw err;
-//       console.log("1 record inserted");
-//       console.log(result)
-//     });
-//   });
