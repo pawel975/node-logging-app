@@ -54,10 +54,10 @@ app.use(express.json());
 app.route("/")
     .get((req, res) => {
         res.status(200);
-        res.redirect("/home-page")
+        res.redirect("/home")
     })
 
-app.route("/home-page")
+app.route("/home")
     .get((req, res) => {
         res.status(200).render("home-page");
     })
@@ -65,13 +65,13 @@ app.route("/home-page")
         res.status(200).render("home-page");
     })
 
-app.route("/register-page")
+app.route("/register")
     .all((req, res) => {
         res.status(200);
         res.render("register-page")
     })
 
-app.route("/logging-page")
+app.route("/logging")
     .get((req, res) => {
         res.status(200);
         res.render("logging-page")
@@ -115,7 +115,7 @@ app.route("/logging-page")
                 res.render("logging-page")
     
             } else {
-                res.redirect("/register-page");
+                res.redirect("/register");
                 console.log("Invalid form of registration data");
             }
         }
@@ -180,20 +180,49 @@ app.route("/user-dashboard")
                     res.status(200).render("user-dashboard", {username: username});
 
                 } else {
-                    res.status(301).redirect("/logging-page");
+                    res.status(301).redirect("/logging");
                 }
                 
             })
         } else {
-            res.status(301).redirect("/logging-page");
+            res.status(301).redirect("/logging");
         }
     })
 
-app.route("/loggedout-page")
+app.route("/loggedout")
     .post((req, res) => {
         req.session.destroy();
         res.status(200);
         res.render("loggedout-page");
+    })
+
+app.route("/deleted-account")
+    .all((req, res) => {
+
+        const {userid} = req.session;
+
+        if (userid) {
+            
+            const deleteUserFromDatabase = `DELETE FROM users WHERE id="${userid}"`;
+    
+            const db = mysql.createConnection(getConnectionConfig(databaseName));
+    
+            db.query(deleteUserFromDatabase, (err, result) => {
+    
+                if (err) throw err;
+    
+                console.log("User has been deleted successfully");
+            })
+    
+            req.session.destroy();
+            res.status(200);
+            res.render("deleted-account-page");
+        } else {
+            res.status(403).render("error", {
+                text: "Unauthorized access - you're not logged in", 
+                status: 403
+            });
+        }
     })
 
 app.listen(8080, () => {
@@ -203,6 +232,8 @@ app.listen(8080, () => {
 
 // Creates database on mysql server if doesn't exist
 initConnection(databaseName);
+
+
 
 setTimeout(() => {
 
