@@ -126,7 +126,18 @@ app.route("/logging")
     });
 
 app.route("/user-dashboard")
-    .all((req, res) => {
+    .get((req, res) => {
+
+        const session = req.session;
+        const {userid} = session;
+
+        if (userid) {
+            res.status(200).render("user-dashboard");
+        } else {
+            res.status(301).render("logging-page");
+        }
+    })
+    .post((req, res) => {
 
         // Checking if logging data format is valid
         const loggingParams = {
@@ -141,35 +152,37 @@ app.route("/user-dashboard")
         // If logging data format is valid check in database if user is registered
         if (isLoggingDataValid) {
 
-            const getAllLoginDataFromDatabase = `SELECT * FROM users;`;    
-            
             const db = mysql.createConnection(getConnectionConfig(databaseName));
-                
+            
             db.connect((err) => {
-
+                
                 if (err) throw err;
 
+                // Fetch all users and find user that is logging in
+                const getAllLoginDataFromDatabase = `SELECT * FROM users;`;    
+                
                 db.query(getAllLoginDataFromDatabase, async (err, result) => {
     
                     if (err) throw err;
     
                     const allUsers = queryResultToObject(result);
-    
+
                     const user = allUsers.find(user => 
                         user.username === loggingUsername && user.password === loggingPassword
                     )
     
+                    // If user exists, log him in and display user dashboard
                     if (user) {
     
                         const session = req.session;
-    
+
                         session.userid = user.id
                         session.username = user.username;
                         session.password = user.password;
                         
                         const {username, userid} = session;
 
-                        const allUserNotes = await getUserNotes(db, userid)
+                        const allUserNotes = await getUserNotes(userid)
 
                         res.status(200).render("user-dashboard", {
                             username: username,
@@ -191,9 +204,23 @@ app.route("/user-dashboard")
 
 app.route("/loggedout")
     .all((req, res) => {
-        req.session.destroy();
-        res.status(200);
-        res.render("loggedout-page");
+        
+        const session = req.session;
+        const {userid} = session;
+
+        if (userid) {
+
+            session.destroy();
+            res.status(200).render("loggedout-page");
+            
+        } else {
+
+            res.status(403).render("error", {
+                status: 403,
+                text: "Unauthorized access - you're not logged in!"
+            });
+
+        }
     })
 
 app.route("/deleted-account")
@@ -203,25 +230,37 @@ app.route("/deleted-account")
 
         if (userid) {
             
-            const deleteUserFromDatabase = `DELETE FROM users WHERE id="${userid}"`;
-    
             const db = mysql.createConnection(getConnectionConfig(databaseName));
+
+            const deleteUserFromDatabase = `DELETE FROM users WHERE id="${userid}"`;
     
             db.query(deleteUserFromDatabase, (err, result) => {
     
                 if (err) throw err;
     
-                console.log("User has been deleted successfully");
+                console.log("User profile has been deleted successfully");
             })
+
+            const deleteUserNotesFromDatabase = `DELETE FROM notes WHERE userid="${userid}"`
     
+            db.query(deleteUserNotesFromDatabase, (err, result) => {
+                
+                if (err) throw err;
+
+                console.log("User notes has been deleted successfully");
+            })
+
             req.session.destroy();
             res.status(200);
             res.render("deleted-account-page");
+
         } else {
+
             res.status(403).render("error", {
                 text: "Unauthorized access - you're not logged in", 
                 status: 403
             });
+            
         }
     })
 

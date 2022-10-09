@@ -4,23 +4,24 @@ const getConnectionConfig = require('./getConnectionConfig');
 // Init connection to create db on server if needed
 const initDatabase = (databaseName) => {
 
-    return new Promise(resolve => {
+    return new Promise((resolve, reject) => {
 
-        const connection = mysql.createConnection(getConnectionConfig());
+        const db = mysql.createConnection(getConnectionConfig());
         
-        connection.connect((err) => {
+        db.connect((err) => {
     
-            if (err) throw err;
+            if (err) reject(err);
     
             const findDatabase = `SELECT schema_name FROM information_schema.schemata 
                                     WHERE schema_name="${databaseName}";`
         
             // Query Database to check if exists
-            connection.query(findDatabase, (err, result) => {
+            db.query(findDatabase, (err, result) => {
     
-                if (err) throw err;
+                if (err) reject(err);
         
                 if (result.length !== 0) {
+                    
                     console.log("Database already exists");
 
                     resolve(result);
@@ -29,11 +30,12 @@ const initDatabase = (databaseName) => {
                 
                     const createDatabase = `CREATE DATABASE ${databaseName}`;
                 
-                    connection.query(createDatabase, (err, result) => {
+                    db.query(createDatabase, (err, result) => {
     
-                        if (err) throw err;
+                        if (err) reject(err);
                         
                         console.log("Database created");
+
                         resolve(result);
 
                     });
