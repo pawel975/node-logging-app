@@ -8,12 +8,13 @@
     <title>Error</title>
 </head>
 <body>
-    <section class="error">
+    <%- include("templates/navbar"); %>
+    <main class="error">
         <header class="error__status">Error nr - <%= locals.status %></header>
         <hr>
         <div class="error__text">
             <p><%= locals.text %></p>
         </div>
-    </section>
+    </main>
 </body>
 </html>
