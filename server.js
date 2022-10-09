@@ -269,7 +269,7 @@ app.route("/note-created")
 
         const session = req.session;
         
-        const  {userid} = session;
+        const {userid} = session;
         
         if (userid) {
             
