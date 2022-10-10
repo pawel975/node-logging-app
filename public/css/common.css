@@ -23,11 +23,11 @@ a {
 /* Components setup */
 
 body {
-    padding: 20px;
+    padding: 1rem;
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     width: 100%;
     height: 100vh;
-    font-size: 25px;
+    font-size: 1.25rem;
     display: flex;
     flex-direction: column;
     align-items: flex-start;
