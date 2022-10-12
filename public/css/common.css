@@ -1,28 +1,28 @@
 
 /* Basic setup */
-* {
+/* * {
     box-sizing: border-box;
     margin: 0;
     padding: 0;
-}
+} */
 
-button,
+/* button,
 input,
 a {
     font-size: inherit;
     font-family: inherit;
-}
+} */
 
-a {
+/* a {
     width: fit-content;
     height: min-content;
     padding: 0;
-}
+} */
 
 
 /* Components setup */
 
-body {
+/* body {
     padding: 1rem;
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     width: 100%;
@@ -32,51 +32,51 @@ body {
     flex-direction: column;
     align-items: flex-start;
     gap: 1rem;
-}
+} */
 
-nav {
+/* nav {
     display: flex;
     flex-direction: row;
     gap: 1rem;
-}
-
+} */
+/* 
 section {
     display: flex;
     flex-direction: column;
     gap: 1rem;
-}
+} */
 
-main {
+/* main {
     display: flex;
     flex-direction: column;
     align-items: flex-start;
     gap: 1rem;
-}
+} */
 
-form {
+/* form {
     display: flex;
     flex-direction: column;
     align-items: flex-start;
     gap: 0.15rem;
-}
+} */
 
-#create-note-form {
+/* #create-note-form {
     margin: 1rem 0rem;
     display: flex;
     flex-direction: column;
     gap: 0.3rem;
-}
+} */
 
-header {
+/* header {
     background-color: rgb(37, 109, 22);
     border-radius: 5px;
     color: white;
     padding: 5px 15px;
     font-size: 30px;
     font-weight: 700;
-}
+} */
 
-input[type=submit],
+/* input[type=submit],
 button {
     margin-top: 10px;
     background-color: rgb(37, 109, 22);
@@ -84,4 +84,4 @@ button {
     border-radius: 5px;
     color: white;
     padding: 5px 15px;
-}
+} */
