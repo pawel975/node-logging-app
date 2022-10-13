@@ -10,15 +10,19 @@
 </head>
 <body>
     <%- include("templates/navbar"); %>
-    <main>
-        <header>
-            Type your username and password to log in!
+    <main class="container mt-3">
+        <header class="mb-3">
+            <h3 class="text-primary">Type your username and password to log in!</h3>
         </header>
-        <form action="/user-dashboard" method="post">
-            <label for="username">Username</label>
-            <input type="text" id="username" name="username"/>
-            <label for="password">Password</label>
-            <input type="password" id="password" name="password"/>
+        <form action="/user-dashboard" method="post" class="col">
+            <div class="row-2 mt-2">
+                <label class="me-1" for="username">Username</label>
+                <input type="text" id="username" name="username"/>
+            </div>
+            <div class="row-2 mt-2">
+                <label class="me-1" for="password">Password</label>
+                <input type="password" id="password" name="password"/>
+            </div>
             <input type="submit" value="Log in">
         </form>
     </main>
