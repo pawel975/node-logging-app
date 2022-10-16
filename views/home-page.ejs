@@ -5,13 +5,24 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-Zenh87qX5JnK2Jl0vWa8Ck2rdkQ2Bzep5IDxbcnCeuOxjzrPF/et3URy9Bv1WTRi" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.9.1/font/bootstrap-icons.css">
     <link rel="stylesheet" href="/css/common.css">
     <title>Home</title>
 </head>
 <body>
     <%- include("templates/navbar"); %>
-    <main class="container-fluid">
-        <header>Welcome to application, register or login</header>
+    <main class="container d-flex gap-3">
+        <section class="w-50 d-flex flex-column gap-3 align-items-center">
+            <header>
+                <h1 class="text-primary">
+                    Welcome to application, register or login
+                </h1>
+            </header>
+            <p class="w-75 fs-3 text-secondary">This is my project to learn NodeJS with ExpressJS framework and mySQL connection. App would allow user to register and login to his account own account. User would be able to create notes</p>
+        </section>
+        <section class="d-flex justify-content-center align-self-center w-50">
+            <i class="bi bi-diagram-3" style="font-size: 20rem;"></i>
+        </section>
     </main>
     
 </body>
