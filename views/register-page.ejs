@@ -10,19 +10,24 @@
 </head>
 <body>
     <%- include("templates/navbar"); %>
-    <main>
-        <p> <%= locals.info %> </p>
-        <header>
-            Welcome! Create your account
+    <main class="container-sm d-flex flex-column align-items-center">
+        <header class="mb-3">
+            <h3 class="text-primary">Welcome! Create your account</h3>
         </header>
-        <form action="/logging" method="post">
-            <label for="username">Username</label>
-            <input type="text" id="username" name="username"/>
-            <label for="password">Password</label>
-            <input type="password" id="password" name="password"/>
-            <label for="confirmPassword">Confirm Password</label>
-            <input type="password" id="confirmPassword" name="confirmPassword"/>
-            <input type="submit" value="Sign in">
+        <form action="/logging" method="post" class="d-flex flex-column gap-3">
+            <div class="d-flex justify-content-between">
+                <label class="me-4" for="username">Username</label>
+                <input type="text" id="username" name="username"/>
+            </div>
+            <div class="d-flex justify-content-between">
+                <label class="me-4" for="password">Password</label>
+                <input type="password" id="password" name="password"/>
+            </div>
+            <div class="d-flex justify-content-between">
+                <label class="me-4" for="confirmPassword">Confirm Password</label>
+                <input type="password" id="confirmPassword" name="confirmPassword"/>
+            </div>
+            <input type="submit" value="Sign in" class="btn btn-primary px-2 py-1 align-self-start">
         </form>
     </main>
 </html>

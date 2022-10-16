@@ -10,20 +10,20 @@
 </head>
 <body>
     <%- include("templates/navbar"); %>
-    <main class="container mt-3">
+    <main class="container-sm d-flex flex-column align-items-center">
         <header class="mb-3">
             <h3 class="text-primary">Type your username and password to log in!</h3>
         </header>
-        <form action="/user-dashboard" method="post" class="col">
-            <div class="row-2 mt-2">
-                <label class="me-1" for="username">Username</label>
+        <form action="/user-dashboard" method="post" class="d-flex flex-column  gap-3">
+            <div class="d-flex justify-content-between">
+                <label class="me-4" for="username">Username</label>
                 <input type="text" id="username" name="username"/>
             </div>
-            <div class="row-2 mt-2">
-                <label class="me-1" for="password">Password</label>
+            <div class="d-flex justify-content-between">
+                <label class="me-4" for="password">Password</label>
                 <input type="password" id="password" name="password"/>
             </div>
-            <input type="submit" value="Log in">
+            <input type="submit" value="Log in" class="btn btn-primary px-2 py-1 align-self-start">
         </form>
     </main>
 </html>
