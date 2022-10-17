@@ -9,34 +9,44 @@
     <title>Dashboard</title>
 </head>
 <body>
-    <main class="container-fluid">
-        <header>Welcome <%= locals.username %></header>
-        <nav>
-            <a href="/loggedout">
-                <button>Log out</button>
-            </a>
-            <a href="/deleted-account">
-                <button>Delete account</button>
-            </a>
-        </nav>
+    <nav class="navbar navbar-expand-lg bg-light mb-4">
+        <div class="container-fluid">
+            <ul class="navbar-nav">
+                <li class="nav-item">
+                    <a class="nav-link" href="/loggedout">Log out</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/deleted-account">Delete account</a>
+                </li>
+            </ul>
+        </div>
+    </nav>
+
+    <main class="container-sm d-flex flex-column align-items-center">
+
+        <header> 
+            <h2 class="text-secondary">
+                Welcome <span class="text-primary"><%= locals.username %> </span>
+            </h2>
+        </header>
 
         <hr>
 
-        <form action="/note-created" method="post" id="create-note-form">
-            <div>
-                <label for="noteTitle">Title</label>
-                <input type="text" id="noteTitle" name="noteTitle" />
+        <form action="/note-created" method="post" class="d-flex flex-column gap-3">
+            <div class="d-flex justify-content-between align-items-center">
+                <label class="me-4 w-25" for="noteTitle">Title</label>
+                <input class="form-control w-auto" type="text" id="noteTitle" name="noteTitle" />
             </div>
-            <div>
-                <label for="noteText">Text</label>
-                <input type="text" id="noteText" name="noteText" />
+            <div class="d-flex justify-content-between align-items-center">
+                <label class="me-4 w-25" for="noteText">Text</label>
+                <input class="form-control w-auto" type="text" id="noteText" name="noteText" />
             </div>
-            <input type="submit" value="Create note">
+            <input class="align-self-start btn btn-primary" type="submit" value="Create note">
         </form>
 
         <hr>
 
-        <table class="table table-dark table-striped">
+        <table class="container w-50 table table-light table-striped">
             <thead>
                 <tr>
                     <th>Title</th>
